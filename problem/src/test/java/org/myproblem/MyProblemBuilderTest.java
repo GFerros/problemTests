@@ -260,5 +260,91 @@ public class MyProblemBuilderTest {
         }
     }
 
+    @Nested
+    class EdgeCases { //Test Case 11
+
+        @Test
+        void shouldHandleUTF8Detail() {
+            String utf8Detail = "𝄞".repeat(5000);
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail(utf8Detail)
+                    .build();
+            assertEquals(utf8Detail, problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleUnicodeCharacters() {
+            String unicodeDetail = "问题详情";
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail(unicodeDetail)
+                    .build();
+            assertEquals(unicodeDetail, problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleSpecialCharacters() {
+            String specialChars = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?";
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail(specialChars)
+                    .build();
+            assertEquals(specialChars, problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleNullParameters() {
+            Problem problem = createTypicalProblem();
+            assertNull(problem.getParameters().get("extra"));
+        }
+
+        @Test
+        void shouldBuildWithNumericParameter() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("count", 42)
+                    .build();
+            assertEquals(42, problem.getParameters().get("count"));
+        }
+
+        @Test
+        void shouldBuildWithBooleanParameter() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("isValid", true)
+                    .build();
+            assertEquals(true, problem.getParameters().get("isValid"));
+        }
+
+        @Test
+        void shouldHandleDuplicateParameters() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("key", "value1")
+                    .with("key", "value1")
+                    .build();
+            assertEquals(1, problem.getParameters().size());
+        }
+
+        @Test
+        void shouldHandleAllNullFields() {
+            Problem problem = Problem.builder()
+                    .withType(null)
+                    .withTitle(null)
+                    .withStatus(null)
+                    .withDetail(null)
+                    .withInstance(null)
+                    .build();
+
+            assertEquals("about:blank", problem.getType().toString());
+            assertNull(problem.getTitle());
+            assertNull(problem.getStatus());
+            assertNull(problem.getDetail());
+            assertNull(problem.getInstance());
+            assertTrue(problem.getParameters().isEmpty());
+        }
+    }
+
 
 }
