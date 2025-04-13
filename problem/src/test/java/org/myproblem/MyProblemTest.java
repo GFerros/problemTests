@@ -293,5 +293,122 @@ public class MyProblemTest {
                 assertEquals("about:blank{400}", result);
             }
         }
+
+        @Nested
+        class BoundaryTests { //Test Case 6
+            @Test
+            void shouldHandleEmptyDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "");
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, }", result);
+            }
+
+            @Test
+            void shouldHandleSingleCharDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "a");
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, a}", result);
+            }
+
+            @Test
+            void shouldHandleDefaultDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "about:blank");
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, about:blank}", result);
+            }
+
+            @Test
+            void shouldHandleVeryLongDetail() {
+                String longDetail = "a".repeat(10000);
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, longDetail);
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(longDetail));
+            }
+
+            @Test
+            void shouldHandleEmptyURI() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create(""));
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, instance=}", result);
+            }
+
+            @Test
+            void shouldHandleRootURI() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create("/"));
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, instance=/}", result);
+            }
+
+            @Test
+            void shouldHandleDefaultURI() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create("about:blank"));
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404, Not Found, instance=about:blank}", result);
+            }
+
+            @Test
+            void shouldHandleVeryLongURI() {
+                String longPath = "/" + "a".repeat(1000);
+                URI instance = URI.create("https://example.org" + longPath);
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, instance);
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(instance.toString()));
+            }
+
+            @Test
+            void shouldHandleEmptyParameters() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .build();
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{404}", result);
+            }
+
+            @Test
+            void shouldHandleSingleParameter() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .with("key", "value")
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains("key=value"));
+            }
+
+            @Test
+            void shouldHandleMultipleParameters() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .with("key1", "value1")
+                        .with("key2", "value2")
+                        .with("key3", "value3")
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains("key1=value1"));
+                assertTrue(result.contains("key2=value2"));
+                assertTrue(result.contains("key3=value3"));
+            }
+
+            @Test
+            void shouldHandleEmptyParameterValue() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .with("key", "")
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains("key="));
+            }
+
+            @Test
+            void shouldHandleLongParameterValue() {
+                String longValue = "a".repeat(1000);
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .with("key", longValue)
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(longValue));
+            }
+
+        }
     }
 }
