@@ -220,4 +220,78 @@ public class MyProblemTest {
             }
         }
     }
+
+    @Nested
+    class ToStringTests { //Test Case 5-7
+
+        //Note that for the Problem.valueOf(StatusType) method, the title is set to the status's reason phrase
+        //which is done automatically in Problem.valueOf to be compliant with RFC 7807 standards
+        @Nested
+        class BasicInputTests { //Test Case 5
+            @Test
+            void withStatus() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND);
+                String result = Problem.toString(problem);
+
+                assertEquals("about:blank{404, Not Found}", result);
+            }
+
+            @Test
+            void withStatusAndDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "Order 123");
+                String result = Problem.toString(problem);
+
+                assertEquals("about:blank{404, Not Found, Order 123}", result);
+            }
+
+            @Test
+            void withStatusAndInstance() {
+                URI instance = URI.create("https://example.org/");
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, instance);
+                String result = Problem.toString(problem);
+
+                assertEquals("about:blank{404, Not Found, instance=https://example.org/}", result);
+            }
+
+            @Test
+            void withStatusDetailAndInstance() {
+                URI instance = URI.create("https://example.org/orders/123");
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "Order 123", instance);
+                String result = Problem.toString(problem);
+
+                assertEquals("about:blank{404, Not Found, Order 123, instance=https://example.org/orders/123}", result);
+            }
+
+            @Test
+            void withCustomTypeAndParameters() {
+                Problem problem = Problem.builder()
+                        .withType(URI.create("https://example.org/error"))
+                        .withStatus(Status.UNPROCESSABLE_ENTITY)
+                        .withTitle("Validation Error")
+                        .withDetail("Name is required")
+                        .withInstance(URI.create("/users/123"))
+                        .with("field", "name")
+                        .with("code", "VALIDATION_001")
+                        .build();
+
+                String result = Problem.toString(problem);
+                assertEquals(
+                        "https://example.org/error{422, Validation Error, Name is required, instance=/users/123, field=name, code=VALIDATION_001}",
+                        result
+                );
+            }
+
+            @Test
+            void omitsNullFields() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.BAD_REQUEST)
+                        .build();
+
+                //Note that .build does not automatically set the title to the status's reason phrase
+                //which is done automatically in Problem.valueOf to be compliant with RFC 7807 standards
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{400}", result);
+            }
+        }
+    }
 }
