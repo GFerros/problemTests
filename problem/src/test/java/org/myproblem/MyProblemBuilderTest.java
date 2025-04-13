@@ -15,6 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.zalando.problem.Status.BAD_REQUEST;
 
 public class MyProblemBuilderTest {
+
+    private Problem createTypicalProblem() {
+        return Problem.builder()
+                .withType(URI.create("https://example.org/error"))
+                .withTitle("Error")
+                .withStatus(BAD_REQUEST)
+                .withInstance(URI.create("https://example.com/"))
+                .with("add", "1")
+                .with("extra", null)
+                .build();
+    }
+
     @Nested
     class SpecialValueTests { //Test Case 8
 
@@ -49,6 +61,58 @@ public class MyProblemBuilderTest {
             assertThrows(UnsupportedOperationException.class, () -> problem.getParameters().put("test", "value"));
         }
 
+    }
+
+    @Nested
+    class BasicInputTests { //Test Case 9
+        // Individual tests for each property
+        @Test
+        void shouldBuildURICorrectly() {
+            Problem problem = createTypicalProblem();
+            assertEquals("https://example.org/error", problem.getType().toString());
+        }
+
+        @Test
+        void shouldBuildTitleCorrectly() {
+            Problem problem = createTypicalProblem();
+            assertEquals("Error", problem.getTitle());
+        }
+
+        @Test
+        void shouldBuildStatusCorrectly() {
+            Problem problem = createTypicalProblem();
+            assertEquals(400, Objects.requireNonNull(problem.getStatus()).getStatusCode());
+        }
+
+        @Test
+        void shouldBuildInstanceCorrectly() {
+            Problem problem = createTypicalProblem();
+            assertEquals("https://example.com/", Objects.requireNonNull(problem.getInstance()).toString());
+        }
+
+        @Test
+        void shouldBuildAddsParameters() {
+            Problem problem = createTypicalProblem();
+            assertEquals("1", problem.getParameters().get("add"));
+        }
+
+        @Test
+        void shouldBuildWithNullParameter() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("nullParam", null)
+                    .build();
+            assertNull(problem.getParameters().get("nullParam"));
+        }
+
+        @Test
+        void shouldBuildWithEmptyParameter() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("emptyParam", "")
+                    .build();
+            assertEquals("", problem.getParameters().get("emptyParam"));
+        }
     }
 
 
