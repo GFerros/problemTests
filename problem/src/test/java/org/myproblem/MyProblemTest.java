@@ -182,5 +182,42 @@ public class MyProblemTest {
                 assertEquals(instance, problem.getInstance());
             }
         }
+
+        @Nested
+        class EdgeCases { //Test Case 4
+            @Test
+            void shouldHandleUnicodeCharacters() {
+                String unicodeDetail = "问题详情"; // Chinese characters
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, unicodeDetail);
+                assertEquals(unicodeDetail, problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleSpecialCharactersInDetail() {
+                String specialChars = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?";
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, specialChars);
+                assertEquals(specialChars, problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleWhitespaceOnlyDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "   ");
+                assertEquals("   ", problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleNullDetailWithInstance() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, null, URI.create("https://example.org"));
+                assertNull(problem.getDetail());
+                assertNotNull(problem.getInstance());
+            }
+
+            @Test
+            void shouldHandleNullInstanceWithDetail() {
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "Some detail", null);
+                assertNotNull(problem.getDetail());
+                assertNull(problem.getInstance());
+            }
+        }
     }
 }
