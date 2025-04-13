@@ -127,5 +127,60 @@ public class MyProblemTest {
 
             }
         }
+
+        @Nested
+        class BoundaryTests { //Test Case 3
+
+            @Test
+            void shouldHandleEmptyDetail() { //minimum length detail
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "");
+                assertEquals("", problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleOneCharDetail() { //minimum + 1 length detail
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "a");
+                assertEquals("a", problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleDefaultDetail() { //default detail
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, "about:blank");
+                assertEquals("about:blank", problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleVeryLongDetail() { //maximum length detail
+                String longDetail = "a".repeat(10000); // 10KB string
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, longDetail);
+                assertEquals(longDetail, problem.getDetail());
+            }
+
+            @Test
+            void shouldHandleEmptyURI() { //minimum length URI (instance)
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create(""));
+                assertEquals(URI.create(""), problem.getInstance());
+            }
+
+            @Test
+            void shouldHandleRootURI() { //minimum + 1 length URI (instance)
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create("/"));
+                assertEquals(URI.create("/"), problem.getInstance());
+            }
+
+            @Test
+            void shouldHandleDefaultURI() { //default URI (instance)
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, URI.create("about:blank"));
+                assertEquals(URI.create("about:blank"), problem.getInstance());
+            }
+
+            @Test
+            void shouldHandleVeryLongURI() { //maximum length URI (instance)
+                String longPath = "/" + "a".repeat(1000);
+                URI instance = URI.create("https://example.org" + longPath);
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, instance);
+                assertEquals(instance, problem.getInstance());
+            }
+        }
     }
 }
