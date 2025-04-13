@@ -410,5 +410,93 @@ public class MyProblemTest {
             }
 
         }
+
+        @Nested
+        class EdgeCases { //Test Case 7
+
+            @Test
+            void shouldHandleUTF8Detail() {
+                String utf8Detail = "𝄞".repeat(5000);
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, utf8Detail);
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(utf8Detail));
+            }
+
+            @Test
+            void shouldHandleUnicodeCharacters() {
+                String unicodeDetail = "问题详情";
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, unicodeDetail);
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(unicodeDetail));
+            }
+
+            @Test
+            void shouldHandleSpecialCharacters() {
+                String specialChars = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?";
+                Problem problem = Problem.valueOf(Status.NOT_FOUND, specialChars);
+                String result = Problem.toString(problem);
+                assertTrue(result.contains(specialChars));
+            }
+
+            @Test
+            void shouldHandleEmptyProblem() {
+                Problem problem = Problem.builder().build();
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{}", result);
+            }
+
+            @Test
+            void shouldHandleNullParameters() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .build();
+                assertNull(problem.getParameters().get("extra"));
+            }
+
+            @Test
+            void shouldBuildWithNumericParameter() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.BAD_REQUEST)
+                        .with("count", 42)
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains("count=42"));
+            }
+
+            @Test
+            void shouldBuildWithBooleanParameter() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.BAD_REQUEST)
+                        .with("isValid", true)
+                        .build();
+                String result = Problem.toString(problem);
+                assertTrue(result.contains("isValid=true"));
+            }
+
+            @Test
+            void shouldHandleDuplicateParameters() {
+                Problem problem = Problem.builder()
+                        .withStatus(Status.NOT_FOUND)
+                        .with("key", "value1")
+                        .with("key", "value1")
+                        .build();
+                String result = Problem.toString(problem);
+                assertEquals(1, result.split("key=value1", -1).length - 1);
+            }
+
+            @Test
+            void shouldHandleAllNullFields() {
+                Problem problem = Problem.builder()
+                        .withType(null)
+                        .withTitle(null)
+                        .withStatus(null)
+                        .withDetail(null)
+                        .withInstance(null)
+                        .build();
+                String result = Problem.toString(problem);
+                assertEquals("about:blank{}", result);
+            }
+
+        }
     }
 }
