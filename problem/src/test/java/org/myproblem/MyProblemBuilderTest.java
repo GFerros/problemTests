@@ -115,5 +115,150 @@ public class MyProblemBuilderTest {
         }
     }
 
+    @Nested
+    class BoundaryTests { //Test Case 10
+        @Test
+        void shouldHandleEmptyDetail() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail("")
+                    .build();
+            assertEquals("", problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleSingleCharDetail() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail("z")
+                    .build();
+            assertEquals("z", problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleDefaultDetail() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail("example")
+                    .build();
+            assertEquals("example", problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleVeryLongDetail() {
+            String longDetail = "z".repeat(10000);
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withDetail(longDetail)
+                    .build();
+            assertEquals(longDetail, problem.getDetail());
+        }
+
+        @Test
+        void shouldHandleEmptyURI() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withInstance(URI.create(""))
+                    .build();
+            assertEquals("", Objects.requireNonNull(problem.getInstance()).toString());
+        }
+
+        @Test
+        void shouldHandleRootURI() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withInstance(URI.create("/"))
+                    .build();
+            assertEquals("/", Objects.requireNonNull(problem.getInstance()).toString());
+        }
+
+        @Test
+        void shouldHandleDefaultURI() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withInstance(URI.create("https://example.org"))
+                    .build();
+            assertEquals("https://example.org", Objects.requireNonNull(problem.getInstance()).toString());
+        }
+
+        @Test
+        void shouldHandleVeryLongURI() {
+            String longPath = "/" + "z".repeat(1000);
+            URI instance = URI.create("https://example.org" + longPath);
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .withInstance(instance)
+                    .build();
+            assertEquals(instance.toString(), Objects.requireNonNull(problem.getInstance()).toString());
+        }
+
+        @Test
+        void shouldHandleEmptyParameters() { //minimum length parameters
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .build();
+            assertTrue(problem.getParameters().isEmpty());
+        }
+
+        @Test
+        void shouldHandleOneParameter() { //minimum + 1 length parameters
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("key", "value")
+                    .build();
+            assertEquals(1, problem.getParameters().size());
+        }
+
+        @Test
+        void shouldHandleMultipleParameters() { //defaultlength parameters
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("key1", "value1")
+                    .with("key2", "value2")
+                    .build();
+            assertEquals(2, problem.getParameters().size());
+            assertEquals("value1", problem.getParameters().get("key1"));
+            assertEquals("value2", problem.getParameters().get("key2"));
+        }
+
+
+        @Test
+        void shouldHandleManyCustomParameters() { //maximum length parameters
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("custom1", "value1")
+                    .with("custom2", "value2")
+                    .with("custom3", "value3")
+                    .with("custom4", "value4")
+                    .with("custom5", "value5")
+                    .build();
+
+            assertEquals(5, problem.getParameters().size());
+            assertEquals("value1", problem.getParameters().get("custom1"));
+            assertEquals("value5", problem.getParameters().get("custom5"));
+        }
+
+
+
+        @Test
+        void shouldHandleEmptyParameterValue() {
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("key", "")
+                    .build();
+            assertEquals("", problem.getParameters().get("key"));
+        }
+
+        @Test
+        void shouldHandleLongParameterValue() {
+            String longValue = "a".repeat(1000);
+            Problem problem = Problem.builder()
+                    .withStatus(Status.NOT_FOUND)
+                    .with("key", longValue)
+                    .build();
+            assertEquals(longValue, problem.getParameters().get("key"));
+        }
+    }
+
 
 }
